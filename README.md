@@ -132,7 +132,7 @@ sensor:
 In Home Assistant, go to **Settings → Add-ons → Add-on Store** and click the menu (⋮) in the top right. Select **Repositories** and add:
 
 ```
-https://github.com/your-username/haos-node-exporter
+https://github.com/mrbig00/haos-node-exporter
 ```
 
 ### 2. Install the add-on
