@@ -1,6 +1,6 @@
 name: "Node Exporter for Home Assistant"
 description: "Expose Home Assistant entity states as Prometheus / Node Exporter compatible metrics"
-version: "1.0.3"
+version: "1.0.4"
 slug: "haos_node_exporter"
 init: false
 arch:
@@ -17,17 +17,6 @@ options:
   label_strategy:
     include_friendly_name: true
     include_domain: true
-  state_mapping:
-    "on": 1
-    "off": 0
-    open: 1
-    closed: 0
-    home: 1
-    away: 0
-    "true": 1
-    "false": 0
-    unlocked: 1
-    locked: 0
   scrape:
     timeout_seconds: 10
     cache_seconds: 15
@@ -45,7 +34,6 @@ schema:
   label_strategy:
     include_friendly_name: bool
     include_domain: bool
-  state_mapping: "match(.*)"
   scrape:
     timeout_seconds: int
     cache_seconds: int

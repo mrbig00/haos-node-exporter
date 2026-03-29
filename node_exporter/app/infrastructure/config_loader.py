@@ -88,12 +88,16 @@ def load_config() -> Config:
         try:
             with _OPTIONS_PATH.open() as f:
                 user = json.load(f)
+            # state_mapping is not exposed in the HA add-on schema (the supervisor
+            # cannot represent arbitrary dicts), so we never read it from options.json.
+            user.pop("state_mapping", None)
             raw = _deep_merge(raw, user)
             log.info("Loaded options from %s", _OPTIONS_PATH)
         except Exception as exc:
             log.warning("Failed to read options.json, using defaults: %s", exc)
 
-    state_mapping = {str(k).lower(): float(v) for k, v in raw.get("state_mapping", {}).items()}
+    # Always use the hardcoded defaults for state_mapping.
+    state_mapping = {str(k).lower(): float(v) for k, v in _DEFAULTS["state_mapping"].items()}
 
     return Config(
         port=int(raw["port"]),
