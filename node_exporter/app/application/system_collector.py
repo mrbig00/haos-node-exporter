@@ -8,6 +8,7 @@ These are real kernel counters — not approximations derived from HA entities.
 
 import os
 import re
+import time
 from pathlib import Path
 
 from app.domain.metric import Metric, MetricType
@@ -233,14 +234,18 @@ class SystemCollector:
     # ------------------------------------------------------------------
 
     def _boot_time(self) -> list[Metric]:
+        metrics = [
+            _g("node_time_seconds", time.time(), {},
+               "System time in seconds since epoch (1970)."),
+        ]
         raw = _read("/proc/stat")
-        if not raw:
-            return []
-        for line in raw.splitlines():
-            if line.startswith("btime"):
-                return [_g("node_boot_time_seconds", float(line.split()[1]),
-                           {}, "Node boot time, in unixtime.")]
-        return []
+        if raw:
+            for line in raw.splitlines():
+                if line.startswith("btime"):
+                    metrics.append(_g("node_boot_time_seconds", float(line.split()[1]),
+                                      {}, "Node boot time, in unixtime."))
+                    break
+        return metrics
 
     # ------------------------------------------------------------------
     # Network  —  /proc/net/dev
