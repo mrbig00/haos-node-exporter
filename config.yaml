@@ -1,0 +1,57 @@
+name: "Node Exporter for Home Assistant"
+description: "Expose Home Assistant entity states as Prometheus / Node Exporter compatible metrics"
+version: "1.0.0"
+slug: "haos_node_exporter"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+url: "https://github.com/home-assistant/addons"
+options:
+  port: 9100
+  include_domains:
+    - sensor
+    - binary_sensor
+  include_entities: []
+  exclude_entities: []
+  label_strategy:
+    include_friendly_name: true
+    include_domain: true
+  state_mapping:
+    "on": 1
+    "off": 0
+    open: 1
+    closed: 0
+    home: 1
+    away: 0
+    "true": 1
+    "false": 0
+    unlocked: 1
+    locked: 0
+  scrape:
+    timeout_seconds: 10
+    cache_seconds: 15
+  compatibility:
+    mode: dual
+    allow_approximations: true
+schema:
+  port: port
+  include_domains:
+    - str
+  include_entities:
+    - str
+  exclude_entities:
+    - str
+  label_strategy:
+    include_friendly_name: bool
+    include_domain: bool
+  state_mapping: "match(.*)"
+  scrape:
+    timeout_seconds: int
+    cache_seconds: int
+  compatibility:
+    mode: list(native|node_exporter|dual)
+    allow_approximations: bool
