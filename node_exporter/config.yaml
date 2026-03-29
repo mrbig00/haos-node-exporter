@@ -1,6 +1,6 @@
 name: "Node Exporter for Home Assistant"
 description: "Expose Home Assistant entity states as Prometheus / Node Exporter compatible metrics"
-version: "1.0.7"
+version: "1.0.8"
 slug: "haos_node_exporter"
 init: false
 homeassistant_api: true
@@ -27,7 +27,7 @@ options:
     timeout_seconds: 10
     cache_seconds: 15
   compatibility:
-    mode: dual
+    mode: node_exporter
     allow_approximations: true
 schema:
   port: port

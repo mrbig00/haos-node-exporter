@@ -83,11 +83,17 @@ class MetricsServer:
 
         mode = self._config.compatibility.mode
 
-        if mode in ("native", "dual") and entities:
+        if mode == "native" and entities:
+            # Only homeassistant_* metrics, no system metrics (clear system list).
+            metrics = [up]
             metrics.extend(self._transform.execute(entities))
 
-        if mode in ("node_exporter", "dual") and entities:
+        elif mode == "dual" and entities:
+            # homeassistant_* + node_* from HA entities (system already included above).
+            metrics.extend(self._transform.execute(entities))
             metrics.extend(self._compat_mapper.execute(entities))
+
+        # mode == "node_exporter": system_collector output only — no HA entity metrics.
 
         # Deduplicate: system_collector values take precedence over
         # compatibility_mapper approximations for the same (name, labels).
