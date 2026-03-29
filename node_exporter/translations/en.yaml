@@ -1,0 +1,25 @@
+configuration:
+  port:
+    name: Port
+    description: Port the /metrics endpoint listens on (default 9100, same as node_exporter).
+  include_domains:
+    name: Include domains
+    description: Only entities in these HA domains will be exported.
+  include_entities:
+    name: Include entities
+    description: Allowlist of specific entity IDs to export. Leave empty to export all entities in the included domains.
+  exclude_entities:
+    name: Exclude entities
+    description: Entity IDs that should never be exported.
+  label_strategy:
+    name: Label strategy
+    description: Controls which extra labels are attached to homeassistant_* metrics.
+  state_mapping:
+    name: State mapping
+    description: Maps non-numeric HA states (on/off, open/closed, etc.) to numeric values.
+  scrape:
+    name: Scrape settings
+    description: Timeout and cache configuration for HA API requests.
+  compatibility:
+    name: Compatibility
+    description: Controls which metric sets are emitted (native, node_exporter, or dual).
