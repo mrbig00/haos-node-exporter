@@ -4,6 +4,7 @@ import signal
 from app.application.collect_entities import CollectEntitiesUseCase
 from app.application.compatibility_mapper import CompatibilityMapperUseCase
 from app.application.render_metrics import RenderMetricsUseCase
+from app.application.system_collector import SystemCollector
 from app.application.transform_metrics import TransformToMetricsUseCase
 from app.infrastructure.config_loader import load_config
 from app.infrastructure.ha_client import HaClient
@@ -34,6 +35,7 @@ async def main() -> None:
         transform=TransformToMetricsUseCase(config),
         compat_mapper=CompatibilityMapperUseCase(config.compatibility),
         renderer=RenderMetricsUseCase(),
+        system_collector=SystemCollector(),
     )
 
     await server.run()

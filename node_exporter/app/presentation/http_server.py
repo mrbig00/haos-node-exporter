@@ -5,6 +5,7 @@ from aiohttp import web
 from app.application.collect_entities import CollectEntitiesUseCase
 from app.application.compatibility_mapper import CompatibilityMapperUseCase
 from app.application.render_metrics import RenderMetricsUseCase
+from app.application.system_collector import SystemCollector
 from app.application.transform_metrics import TransformToMetricsUseCase
 from app.domain.metric import Metric, MetricType
 from app.infrastructure.config_loader import Config
@@ -30,6 +31,22 @@ _DOWN_METRIC = Metric(
 )
 
 
+def _deduplicate(metrics: list[Metric]) -> list[Metric]:
+    """
+    Remove duplicate (name, labels) pairs, keeping the first occurrence.
+    System collector metrics are prepended so they always win over
+    compatibility_mapper approximations when both produce the same key.
+    """
+    seen: set[tuple] = set()
+    result: list[Metric] = []
+    for m in metrics:
+        key = (m.name, tuple(sorted(m.labels.items())))
+        if key not in seen:
+            seen.add(key)
+            result.append(m)
+    return result
+
+
 class MetricsServer:
     def __init__(
         self,
@@ -38,33 +55,49 @@ class MetricsServer:
         transform: TransformToMetricsUseCase,
         compat_mapper: CompatibilityMapperUseCase,
         renderer: RenderMetricsUseCase,
+        system_collector: SystemCollector,
     ) -> None:
         self._config = config
         self._collect = collect
         self._transform = transform
         self._compat_mapper = compat_mapper
         self._renderer = renderer
+        self._system_collector = system_collector
 
     async def handle_metrics(self, request: web.Request) -> web.Response:
+        # --- 1. System metrics (always, independent of HA) ---
+        system_metrics = self._system_collector.collect()
+
+        # --- 2. HA entity metrics ---
         try:
             entities = await self._collect.execute()
+            up = _UP_METRIC
         except Exception as exc:
             log.error("Failed to collect entities from HA API: %s\n%s", exc, traceback.format_exc())
-            output = self._renderer.execute([_DOWN_METRIC])
-            return web.Response(text=output, content_type="text/plain", charset="utf-8", status=500)
+            entities = []
+            up = _DOWN_METRIC
 
-        metrics: list[Metric] = [_UP_METRIC]
+        # --- 3. Assemble in priority order: system → HA ---
+        metrics: list[Metric] = list(system_metrics)
+        metrics.append(up)
+
         mode = self._config.compatibility.mode
 
-        if mode in ("native", "dual"):
+        if mode in ("native", "dual") and entities:
             metrics.extend(self._transform.execute(entities))
 
-        if mode in ("node_exporter", "dual"):
+        if mode in ("node_exporter", "dual") and entities:
             metrics.extend(self._compat_mapper.execute(entities))
 
+        # Deduplicate: system_collector values take precedence over
+        # compatibility_mapper approximations for the same (name, labels).
+        metrics = _deduplicate(metrics)
+
         output = self._renderer.execute(metrics)
+        status = 200 if up.value == 1.0 else 500
         return web.Response(
             text=output,
+            status=status,
             headers={"Content-Type": _CONTENT_TYPE},
         )
 
