@@ -48,8 +48,8 @@ class MetricsServer:
     async def handle_metrics(self, request: web.Request) -> web.Response:
         try:
             entities = await self._collect.execute()
-        except Exception:
-            log.error("Failed to collect entities:\n%s", traceback.format_exc())
+        except Exception as exc:
+            log.error("Failed to collect entities from HA API: %s\n%s", exc, traceback.format_exc())
             output = self._renderer.execute([_DOWN_METRIC])
             return web.Response(text=output, content_type="text/plain", charset="utf-8", status=500)
 
