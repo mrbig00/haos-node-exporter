@@ -127,6 +127,11 @@ class SystemCollector:
     Each sub-collector is isolated; a failure in one never blocks others.
     """
 
+    def __init__(self, node_name: str = "") -> None:
+        # When node_name is set it overrides the nodename label in node_uname_info,
+        # making it easy to identify this host in multi-node Grafana dashboards.
+        self._node_name = node_name.strip()
+
     def collect(self) -> list[Metric]:
         metrics: list[Metric] = []
         for fn in (
@@ -446,12 +451,13 @@ class SystemCollector:
     def _uname(self) -> list[Metric]:
         try:
             u = os.uname()
+            nodename = self._node_name if self._node_name else u.nodename
             return [_g(
                 "node_uname_info",
                 1.0,
                 {
                     "sysname":    u.sysname,
-                    "nodename":   u.nodename,
+                    "nodename":   nodename,
                     "release":    u.release,
                     "version":    u.version,
                     "machine":    u.machine,

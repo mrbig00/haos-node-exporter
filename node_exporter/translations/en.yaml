@@ -1,4 +1,7 @@
 configuration:
+  node_name:
+    name: Node name
+    description: Name used as the nodename label in node_uname_info. Leave empty to use the system hostname.
   port:
     name: Port
     description: Port the /metrics endpoint listens on (default 9100, same as node_exporter).

@@ -35,7 +35,7 @@ async def main() -> None:
         transform=TransformToMetricsUseCase(config),
         compat_mapper=CompatibilityMapperUseCase(config.compatibility),
         renderer=RenderMetricsUseCase(),
-        system_collector=SystemCollector(),
+        system_collector=SystemCollector(node_name=config.node_name),
     )
 
     await server.run()

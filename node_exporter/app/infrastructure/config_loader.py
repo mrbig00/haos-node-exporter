@@ -10,6 +10,7 @@ log = get_logger(__name__)
 _OPTIONS_PATH = Path("/data/options.json")
 
 _DEFAULTS: dict = {
+    "node_name": "",
     "port": 9100,
     "include_domains": ["sensor", "binary_sensor"],
     "include_entities": [],
@@ -61,6 +62,7 @@ class CompatibilityConfig:
 
 @dataclass
 class Config:
+    node_name: str = ""   # overrides nodename in node_uname_info; empty = system hostname
     port: int = 9100
     include_domains: list[str] = field(default_factory=lambda: ["sensor", "binary_sensor"])
     include_entities: list[str] = field(default_factory=list)
@@ -100,6 +102,7 @@ def load_config() -> Config:
     state_mapping = {str(k).lower(): float(v) for k, v in _DEFAULTS["state_mapping"].items()}
 
     return Config(
+        node_name=str(raw.get("node_name", "") or ""),
         port=int(raw["port"]),
         include_domains=list(raw["include_domains"]),
         include_entities=list(raw["include_entities"]),

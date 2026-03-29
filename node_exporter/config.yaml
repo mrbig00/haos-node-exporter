@@ -1,6 +1,6 @@
 name: "Node Exporter for Home Assistant"
 description: "Expose Home Assistant entity states as Prometheus / Node Exporter compatible metrics"
-version: "1.0.8"
+version: "1.0.9"
 slug: "haos_node_exporter"
 init: false
 homeassistant_api: true
@@ -14,6 +14,7 @@ arch:
   - amd64
 url: "https://github.com/home-assistant/addons"
 options:
+  node_name: ""
   port: 9100
   include_domains:
     - sensor
@@ -30,6 +31,7 @@ options:
     mode: node_exporter
     allow_approximations: true
 schema:
+  node_name: str
   port: port
   include_domains:
     - str
